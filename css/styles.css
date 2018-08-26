@@ -83,3 +83,26 @@ h3, p, li {text-transform: uppercase;}
 	text-align: center;
 	margin-bottom: 10px;
 }
+
+.active-0 { background-color: rgba(255, 175, 189, 0.1) }
+.active-1 { background-color: rgba(46, 204, 113, 0.1) }
+.active-0 .player-name, .active-1 .player-name { font-weight: 300; }
+
+.active .player-name::after {
+    content: "\2022";
+    font-size: 47px;
+    position: absolute;
+    color: #EB4D4D;
+    top: -7px;
+    right: 10px;
+
+}
+
+.player-current-box-0 {
+    background-color: #EB4D4D;
+    color: #fff;
+    width: 40%;
+    margin: 0 auto;
+    padding: 12px;
+    text-align: center;
+}
