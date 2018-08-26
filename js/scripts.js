@@ -1,170 +1,100 @@
+
 // GAME RULES:
 //
 // - The game has 2 players, playing in rounds
-// - In each turn, a player rolls a dice as many times as he whishes. Each result get added to his ROUND score
+// - In each turn, a player rolls a dice as many times as he wishes. Each result get added to his ROUND score
 // - BUT, if the player rolls a 1, all his ROUND score gets lost. After that, it's the next player's turn
 // - The player can choose to 'Hold', which means that his ROUND score gets added to his GLBAL score. After that, it's the next player's turn
-// - The first player to reach 100 points on GLOBAL score wins the game??
+// - The first player to reach 100 points on GLOBAL score wins the game
+//
+// */
+	var mainScores, currentScore, activePlayer, gamePlaying; //stores the global variables
 
-var scores, roundScore, activePlayer,gamePlaying;
-var btnRoll = document.querySelector('.btn-roll');
-var btnHold = document.querySelector('.btn-hold');
+	startGame(); // calls the init() function straight away which sets all values to 0
 
-//dice images
-var diceimgs = {
- diceimg01: "https://cdn.pbrd.co/images/70YJMCVVR.png",
- diceimg02: 'https://cdn.pbrd.co/images/711lemsMX.png',
- diceimg03: "https://cdn.pbrd.co/images/711NjfjV5.png",
- diceimg04: "https://cdn.pbrd.co/images/712dK3C2z.png",
- diceimg05: "https://cdn.pbrd.co/images/70Zqc4icX.png",
- diceimg06: "https://cdn.pbrd.co/images/712DzRw22.png",
- diceimg11: "https://cdn.pbrd.co/images/713n3lHQN.png",
- diceimg12: 'https://cdn.pbrd.co/images/713JSMJDr.png',
- diceimg13: "https://cdn.pbrd.co/images/HvoZO4Gb.png",
- diceimg14: "https://cdn.pbrd.co/images/HvqN3Kjq.png",
- diceimg15: "https://cdn.pbrd.co/images/714IXBStH.png",
- diceimg16: "https://cdn.pbrd.co/images/714ZovsdD.png"
-};
-init();
+document.querySelector(".btn-roll").addEventListener("click", function() { //anonoymous function. cannot reuse
+	if(gamePlaying) { // gamePlaying is already set to true from startGame() function. Therfore the below code will execute until player hits >= 100
 
-document.querySelector('.btn-roll').addEventListener('click', function(){
-	if (gamePlaying) {
-		// 1. random number
+		// 1. Below is random number generator
 		var dice = Math.floor(Math.random() * 6) + 1;
 
-		// 2. display result
-		var diceDOM = document.querySelector('.dice');
-		diceDOM.style.display = 'block';
-		diceDOM.src = diceimgs['diceimg' + activePlayer + dice];
+		// 2. Displays the result
+		var diceDom = document.querySelector(".dice");
+		diceDom.style.display = "block";
+		diceDom.src = "https://s3-us-west-2.amazonaws.com/s.cdpn.io/243004/dice-" + dice + ".png";
 
-		document.querySelector('#current-' + activePlayer).innerHTML = '<em>' + dice + '</em';
-
-		// 3. Update round score if the rolled number is not 1
-		if (dice !== 1) {
-			hideRolledMsg();
-			//add score
-			roundScore += dice;
-			document.querySelector('#current-' + activePlayer).textContent = roundScore;
+		// 3.
+		// IF will update the score IF the rolled number was NOT a 1
+		if (dice !==1) {
+			currentScore += dice; // adding whatever value of dice is to the current box score
+			document.querySelector("#current-" + activePlayer).textContent = currentScore; // This will add the roundScore to the active player's current score
 		} else {
-			//disable button
-
-			disableBtn(btnRoll, 1000);
-			hideRolledMsg();
-			document.querySelector('.player-'+activePlayer+'-rolled-1').style.visibility = 'visible';
-			nextPlayer();
+			// Next player
+			nextPlayer(); //DRY - Don't Repeat Yourself! Reuse function in this code.
 		}
 	}
-
-
 });
 
+/////////////////// IMPLEMENTING OUR HOLD FUNCTION //////////////////////////
 
+document.querySelector(".btn-hold").addEventListener("click", function () { //another anonymous function which doesn't have a name and we cannot reuse again
+	if(gamePlaying) {
+		// Below adds CURRENT score to the GLOBAL score
+		mainScores[activePlayer] += currentScore;
 
-document.querySelector('.btn-hold').addEventListener('click', function(){
-		if (gamePlaying) {
-			disableBtn(btnRoll, 1000);
-			// Add current score to global score
-			scores[activePlayer] += roundScore;
+		// Update the user interface
+		document.querySelector("#score-" + activePlayer).textContent = mainScores[activePlayer];
 
-			//Update the UI
-			document.querySelector('#score-' + activePlayer).textContent = scores[activePlayer];
-
-			//check if player won the game
-
-			if (scores[activePlayer] >= 50) {
-				document.querySelector('#name-' + activePlayer).textContent = 'Winner!';
-				document.querySelector('.dice').style.display = 'none';
-				document.querySelector('.player-' + activePlayer + '-panel').classList.add('winner-' + activePlayer);
-				document.querySelector('.player-' + activePlayer + '-panel').classList.remove('active-' + activePlayer);
-				gamePlaying = false;
-
-			} else {
-				nextPlayer();
-			}
+		// Check if player won the game
+		if (mainScores[activePlayer] >= 100) {
+			document.querySelector("#name-" + activePlayer).textContent = "Winner Winner Chicken Dinner!";
+			document.querySelector(".dice").style.display = "none";
+			document.querySelector(".player-" + activePlayer + "-panel").classList.add("winner"); // selects the player who won and adds the CSS winner class
+			document.querySelector(".player-" + activePlayer + "-panel").classList.remove("active"); //selects the player who won and removes their CSS active class
+			gamePlaying = false; //means that the game is no longer playing because a player won the game. Therefore button roll cannot be clicked.
+		} else {
+			// Next player
+			nextPlayer(); //DRY - Don't Repeat Yourself! Reuse function in this code.
 		}
-
-
+	}
 });
 
-
-document.querySelector('.btn-new').addEventListener('click', init);
-
-document.querySelector('.btn-rules').addEventListener('click', function(){
-	    var games = document.getElementsByClassName('game-panel');
-		for(i=0;i<games.length;i++){
-			games[i].style.display = 'none';
-		}
-
-	    document.querySelector('.btn-back').style.display = 'block';
-		var rules = document.getElementsByClassName('rules-panel');
-		for(i=0;i<rules.length;i++){
-			rules[i].style.display = 'block';
-		}
-
-});
-
-document.querySelector('.btn-back').addEventListener('click', function(){
-	    var games = document.getElementsByClassName('game-panel');
-		for(i=0;i<games.length;i++){
-			games[i].style.display = 'block';
-		}
-
-	    document.querySelector('.btn-back').style.display = 'none';
-		var rules = document.getElementsByClassName('rules-panel');
-		for(i=0;i<rules.length;i++){
-			rules[i].style.display = 'none';
-		}
-
-});
-
-function init() {
-	scores = [0,0];
-	roundScore = 0;
-	activePlayer = 0;
-	gamePlaying = true;
-	document.querySelector('.dice').style.display = 'none';
-	document.getElementById('score-0').textContent = '0';
-	document.getElementById('score-1').textContent = '0';
-	document.getElementById('current-0').textContent = '0';
-	document.getElementById('current-1').textContent = '0';
-	document.querySelector('.player-0-rolled-1').style.visibility = 'hidden';
-	document.querySelector('.player-1-rolled-1').style.visibility = 'hidden';
-
-	document.querySelector('#name-0').textContent = 'Player 1';
-	document.querySelector('#name-1').textContent = 'Player 2';
-	document.querySelector('.player-0-panel').classList.add('active-0');
-	document.querySelector('.player-0-panel').classList.remove('winner-0');
-	document.querySelector('.player-1-panel').classList.remove('winner-1');
-
-}
 
 function nextPlayer() {
-	//next player
-		var icons = document.getElementsByTagName('i');
-		for(i=0;i<icons.length;i++){
-			icons[i].classList.remove('color-' + activePlayer);
-		}
+		// below will execute next player turn if player rolls dice equal to 1
+	 	activePlayer === 0 ? activePlayer = 1 : activePlayer = 0; // same as saying if activePlayer === 0 then activePlayer === 1 else activePlayer = 0
+		currentScore = 0; //resets players current score box to 0
 
-		document.querySelector('.dice').style.display = 'none';
-		document.querySelector('.player-' + activePlayer + '-panel').classList.remove('active-' + activePlayer);
-		activePlayer ===0 ? activePlayer = 1 : activePlayer = 0;
-		roundScore = 0;
+		document.getElementById("current-0").textContent = 0; //if player 1 rolls a one then score = 0
+		document.getElementById("current-1").textContent = 0; //if player 2 rolls a one then score = 0
 
-		for(i=0;i<icons.length;i++){
-			icons[i].classList.add('color-' + activePlayer);
-		}
-		document.querySelector('.player-' + activePlayer + '-panel').classList.add('active-' + activePlayer);
-		document.querySelector('#current-0').textContent = '0';
-		document.querySelector('#current-1').textContent = '0';
+		document.querySelector(".player-0-panel").classList.toggle("active"); //toggles to player 2
+		document.querySelector(".player-1-panel").classList.toggle("active"); //toggles back to player 1
+
+	 	//once player rolls a 1 the dice will disappear and it will be next player turn
+		document.querySelector(".dice").style.display = "none";
 }
 
-function disableBtn(btn, time) {
-	   //disable button
-		btn.disabled = true;
-      	setTimeout(function(){btn.disabled = false;},time);
-}
 
-function hideRolledMsg(){
-	document.querySelector('.player-0-rolled-1').style.visibility = 'hidden';
-	document.querySelector('.player-1-rolled-1').style.visibility = 'hidden';
+document.querySelector(".btn-new").addEventListener("click", startGame); // when we click the .btn-new it will call the init() function,
+
+function startGame() { // function works once new game is clicked as they are linked via above event listener.
+	mainScores = [0, 0]; //stores scores for both players
+	currentScore = 0;
+	activePlayer = 0; // sets default so that player 1 always begins });
+	gamePlaying = true; // once new game is clicked. gamePlaying equals true and will execute btn roll and btn hold functions
+
+	document.querySelector(".dice").style.display = "none"; //removes dice once you click new game
+
+	document.getElementById("score-0").textContent = "0"; // resets play 1 main scoreboard once you click new game
+	document.getElementById("current-0").textContent = "0"; // resets player 1 current score to 0 once new game clicked
+	document.getElementById("score-1").textContent = "0"; // resets play 2 main scoreboard once you click new game
+	document.getElementById("current-1").textContent = "0"; // resets player 2 current score to 0 once new game clicked
+	document.getElementById("name-0").textContent = "Player 1"; // resets text content to player 1 once you click new game
+	document.getElementById("name-1").textContent = "Player 2"; // resets text content to player 2 once you click new game
+	document.querySelector(".player-0-panel").classList.remove("winner"); // removes CSS winner class for player 1 once new game clicked
+	document.querySelector(".player-1-panel").classList.remove("winner"); // removes CSS winner class for player 2 once new game clicked
+	document.querySelector(".player-0-panel").classList.remove("active"); // removes CSS active class for player 1 once new game clicked
+	document.querySelector(".player-1-panel").classList.remove("active"); // removes CSS active class for player 2 once new game clicked
+	document.querySelector(".player-0-panel").classList.add("active"); // adds CSS active class back for player 1 once new game is clicked
 }
