@@ -21,3 +21,5 @@ body {
     height: 100vh;
     color: #555;
 }
+
+h3, p, li {text-transform: uppercase;}
